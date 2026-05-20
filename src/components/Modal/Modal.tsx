@@ -20,14 +20,16 @@ export default function Modal({children, onClose,}: ModalProps) {
     };
 
     window.addEventListener("keydown", handleEsc);
-
+document.body.style.overflow = "hidden";
     return () => {
+          document.body.style.overflow = "auto";
       window.removeEventListener(
         "keydown",
         handleEsc
       );
     };
   }, [onClose]);
+  
 
   const handleBackdropClick = (
     event: React.MouseEvent<HTMLDivElement>

@@ -4,15 +4,15 @@ import type { FormikHelpers } from "formik";
 import { useId } from "react";
 import * as Yup from "yup";
 import { createNote } from "../../services/noteService";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
 
-interface OrderFormValues {
+interface NoteFormValues {
     title: string,
     content: string,
     tag: string;
 }
 
-const initialValues: OrderFormValues = {
+const initialValues: NoteFormValues = {
     title: "",
     content: "",
     tag: "",
@@ -29,7 +29,7 @@ export default function NoteForm({
 
     const OrderFormSchema = Yup.object().shape({
   title: Yup.string()
-    .min(3, "Title must be at least 2 characters")
+    .min(3, "Title must be at least 3 characters")
     .max(50, "Title is too long")
     .required("Title is required"),
   content: Yup.string()
@@ -43,21 +43,24 @@ export default function NoteForm({
 });
     
   const queryClient = useQueryClient();
-const handleSubmit = async (
-    values: OrderFormValues,
-    actions: FormikHelpers<OrderFormValues>
-) => {
-  try {
-    await createNote(values);
+const mutation = useMutation({
+  mutationFn: createNote,
 
+  onSuccess: () => {
     queryClient.invalidateQueries({
       queryKey: ["notes"],
     });
-    actions.resetForm();
-    onClose(); // закриває модалку
-  } catch (error) {
-    console.log("Error creating note:", error);
-  }
+
+    onClose();
+  },
+});
+const handleSubmit = (
+  values: NoteFormValues,
+  actions: FormikHelpers<NoteFormValues>
+) => {
+  mutation.mutate(values);
+
+  actions.resetForm();
 };
     return (
         <Formik initialValues={ initialValues } validationSchema={OrderFormSchema} onSubmit={handleSubmit}>
@@ -99,7 +102,7 @@ const handleSubmit = async (
     <button
       type="submit"
       className={css.submitButton}
-      disabled={false}
+      disabled={mutation.isPending}
     >
       Create note
     </button>

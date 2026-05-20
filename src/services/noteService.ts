@@ -1,5 +1,6 @@
 import axios from "axios";
 import type { Note } from "../types/note";
+import type { NewNote } from "../types/note";
 
 interface FetchNotesResponse {
   notes: Note[];
@@ -23,7 +24,7 @@ export const fetchNotes = async ( searchText: string, page: number ): Promise<Fe
   return response.data;
 };
 
-export const createNote = async ( note: Omit<Note, "id"> ): Promise<Note> => {
+export const createNote = async (note: NewNote) => {
     const response = await axios.post<Note>("/notes", note, {
             headers: {
       Authorization: `Bearer ${import.meta.env.VITE_NOTEHUB_TOKEN}`,
@@ -32,7 +33,7 @@ export const createNote = async ( note: Omit<Note, "id"> ): Promise<Note> => {
     return response.data;
 }
 
-export const deleteNote = async ( id: number): Promise<Note> => {
+export const deleteNote = async ( id: string): Promise<Note> => {
     const response = await axios.delete<Note>(`/notes/${id}`, {
                     headers: {
       Authorization: `Bearer ${import.meta.env.VITE_NOTEHUB_TOKEN}`,
